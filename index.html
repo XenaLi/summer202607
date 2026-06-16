@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZPD 聖靈寶石終端機 V10</title>
+
+    <!-- 引入 PWA 設定檔 -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- 設定手機版網頁主題顏色 -->
+    <meta name="theme-color" content="#000000">
+
     <style>
         :root { --zpd-blue: #0a2463; --zpd-dark: #020612; --zpd-gold: #fbaf00; --zpd-cyan: #00ebff; }
         body { background: var(--zpd-dark); color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; text-align: center; overflow-x: hidden; }
@@ -73,15 +80,15 @@
 </div>
 
 <div class="gem-grid">
-    <div id="slot-1" class="gem-slot"><img class="gem-icon" src="gem=1.jpg"></div>
-    <div id="slot-2" class="gem-slot"><img class="gem-icon" src="gem=2.jpg"></div>
-    <div id="slot-3" class="gem-slot"><img class="gem-icon" src="gem=3.jpg"></div>
-    <div id="slot-4" class="gem-slot"><img class="gem-icon" src="gem=4.jpg"></div>
-    <div id="slot-5" class="gem-slot"><img class="gem-icon" src="gem=5.jpg"></div>
-    <div id="slot-6" class="gem-slot"><img class="gem-icon" src="gem=6.jpg"></div>
-    <div id="slot-7" class="gem-slot"><img class="gem-icon" src="gem=7.jpg"></div>
-    <div id="slot-8" class="gem-slot"><img class="gem-icon" src="gem=10.jpg"></div>
-    <div id="slot-9" class="gem-slot"><img class="gem-icon" src="gem=9.jpg"></div>
+    <div id="slot-1" class="gem-slot"><img class="gem-icon" src="images/gem=1.jpg"></div>
+    <div id="slot-2" class="gem-slot"><img class="gem-icon" src="images/gem=2.jpg"></div>
+    <div id="slot-3" class="gem-slot"><img class="gem-icon" src="images/gem=3.jpg"></div>
+    <div id="slot-4" class="gem-slot"><img class="gem-icon" src="images/gem=4.jpg"></div>
+    <div id="slot-5" class="gem-slot"><img class="gem-icon" src="images/gem=5.jpg"></div>
+    <div id="slot-6" class="gem-slot"><img class="gem-icon" src="images/gem=6.jpg"></div>
+    <div id="slot-7" class="gem-slot"><img class="gem-icon" src="images/gem=7.jpg"></div>
+    <div id="slot-8" class="gem-slot"><img class="gem-icon" src="images/gem=10.jpg"></div>
+    <div id="slot-9" class="gem-slot"><img class="gem-icon" src="images/gem=9.jpg"></div>
 </div>
 
 <div id="overlay"></div>
@@ -92,6 +99,16 @@
 </div>
 
 <script>
+    <!-- 註冊 Service Worker -->
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        // 使用相對路徑註冊 sw.js
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker 註冊成功！', reg))
+            .catch(err => console.log('Service Worker 註冊失敗：', err));
+        });
+    }
+
     const gemLibrary = {
         '1': ['仁愛', '愛是所有品格中最強大的武裝。'],
         '2': ['喜樂', '靠主常存喜樂，是強大的治癒力量。'],
