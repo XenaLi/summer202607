@@ -2,7 +2,9 @@
   "name": "summer202607_prj",
   "short_name": "summer",
   "start_url": "/summer202607/",
+  "scope": "/summer202607/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
