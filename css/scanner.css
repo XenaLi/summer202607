@@ -1,0 +1,118 @@
+body {
+    font-family: sans-serif;
+    padding: 30px;
+    text-align: center;
+    background: #fafafa;
+}
+
+/* 觸發小按鈕 */
+.scan-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.scan-btn:hover { 
+    background-color: #0056b3; 
+}
+
+/* 彈出視窗背景遮罩 */
+.modal-overlay {
+    display: none; /* 預設隱藏 */
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100vw; height: 100vh; /* 確保佔滿全螢幕 */
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 彈出視窗主體 */
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 85%;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* 【重要】確保掃描容器有基本寬高，且內部影像能填滿 */
+#reader { 
+    width: 100%; 
+    min-height: 250px; /* 給予一個基本高度撐開畫面 */
+    background: #111; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+
+/* 關閉按鈕 */
+.close-btn {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+}
+
+#error-msg { 
+    color: red; 
+    margin-top: 10px; 
+    font-weight: bold; 
+}
+
+/* 右下角懸浮按鈕主體 */
+#floating-scan-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 30px; /* 留出底部距離，避免被手機 Safar/Chrome 的虛擬底條擋住 */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%; /* 完美圓形 */
+    background-color: var(--zpd-blue, #0a2463);
+    color: var(--zpd-cyan, #00ebff);
+    border: 2px solid var(--zpd-cyan, #00ebff);
+    cursor: pointer;
+    z-index: 90; /* 確保在一般內容上方，但低於遮罩層的 100 */
+    
+    /* 彈性佈局讓圖示完美居中 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* 科技感發光陰影 */
+    box-shadow: 0 0 15px rgba(0, 235, 255, 0.4), inset 0 0 10px rgba(0, 235, 255, 0.2);
+    transition: all 0.2s ease;
+    
+    /* 避免手機長按彈出選單 */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 點擊按鈕時的動態回饋 */
+#floating-scan-btn:active {
+    transform: scale(0.9); /* 按下時微縮放 */
+    box-shadow: 0 0 5px rgba(0, 235, 255, 0.8);
+    background-color: var(--zpd-cyan, #00ebff);
+    color: var(--zpd-dark, #020612);
+}
+
+/* 錯誤訊息提示微調，確保不會被懸浮按鈕完全擋住 */
+#error-msg {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 91;
+    max-width: 250px;
+    display: none; /* 有錯誤時再透過 JS 改為 block 顯示 */
+}

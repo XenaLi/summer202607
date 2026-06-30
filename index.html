@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZPD 聖靈寶石終端機 V10</title>
 
+    <!-- 引入外部 CSS 樣式 -->
+    <link rel="stylesheet" href="css/scanner.css">
+
+    <!-- 引入 html5-qrcode 第三方函式庫 -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <script src="js/scanner.js"></script>
+
     <!-- 引入 PWA 設定檔 -->
     <link rel="manifest" href="manifest.json">
 
@@ -74,9 +82,8 @@
         .btn-confirm:active { transform: translateY(2px); box-shadow: 0 2px 0 #b37d00; }
     </style>
 </head>
-<body onclick="closeBoot()">
 
-<div id="boot-screen">
+<div id="boot-screen" onclick="closeBoot()">
     <div style="color:var(--zpd-cyan); font-family: monospace; margin-bottom: 10px;">[ SYSTEM INITIALIZING ]</div>
     <h2 style="margin:0;">ZPD 偵查終端</h2>
     <p style="font-size: 12px; color: #666; margin-top: 30px;">點擊螢幕進行生物辨識</p>
@@ -102,6 +109,21 @@
     <div id="slot-7" class="gem-slot"><img class="gem-icon" src="images/gem=7.jpg"></div>
     <div id="slot-8" class="gem-slot"><img class="gem-icon" src="images/gem=10.jpg"></div>
     <div id="slot-9" class="gem-slot"><img class="gem-icon" src="images/gem=9.jpg"></div>
+</div>
+
+<button id="floating-scan-btn" class="scan-btn" onclick="openScanner()" title="啟動證據掃描器">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+    </svg>
+</button>
+
+<div id="scanModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeScanner()">&times;</span>
+        <h3>請對準 QR Code</h3>
+        <div id="reader"></div>
+    </div>
 </div>
 
 <div id="overlay"></div>
@@ -149,11 +171,10 @@
         // V10 使用全新儲存空間，徹底清除舊版 Bug 影響
         let collection = JSON.parse(localStorage.getItem('zpd_v10_final') || '[]');
 
-        if (gemId && gemLibrary[gemId]) {
-            if (!collection.includes(gemId)) {
-                collection.push(gemId);
-                localStorage.setItem('zpd_v10_final', JSON.stringify(collection));
-            }
+        if (gemId && gemLibrary[gemId] && !collection.includes(gemId)) {
+            collection.push(gemId);
+            localStorage.setItem('zpd_v10_final', JSON.stringify(collection));
+
             // 延遲跳出彈窗，增加視覺儀式感
             setTimeout(() => {
                 document.getElementById('atitle').innerText = "尋獲「" + gemLibrary[gemId][0] + "寶石」";
@@ -182,6 +203,41 @@
         window.location.href = window.location.pathname;
     }
 
+    // 掃描成功的回呼函式
+    function onScanSuccess(decodedText, decodedResult) {
+        // 停止掃描，避免重複觸發跳轉
+        closeScanner().then(() => {
+            handleInternalNavigation(decodedText);
+            closeScanner();
+        }).catch(error => {
+            console.error("停止，掃描失敗：", error);
+        });
+    }
+
+    // 掃描失敗的回呼函式（通常忽略以維持效能，這裡留白）
+    function onScanFailure(error) {
+        // do nothing
+    }
+
+    // 安全檢查與內部跳轉邏輯
+    function handleInternalNavigation(scannedUri) {
+        try {
+            // 取得當前網站網域（例如 https://example.com）
+            const currentDomain = window.location.origin;
+
+            // 解析掃描到的網址
+            const url = new URL(decodeURIComponent(scannedUri));
+                
+            // 檢查是否為同一個網站（防止釣魚網站或外部惡意跳轉）
+            if (url.origin === currentDomain) {
+                parseUrl(url);
+            } 
+        } catch (e) {
+            // 如果掃描出來的不是標準網址，嘗試當作純相對路徑處理
+            console.error("Incorrect QR code:", scannedUrl);
+        }
+    }
+
     // 處理scheme轉導
     // 現代 PWA 專用的單一實例啟動監聽器
     if ('launchQueue' in window) {
@@ -193,14 +249,14 @@
             const activeUrl = new URL(launchParams.targetURL);
 
             // 2. 從網址中解析出我們的 Scheme 參數 (value)
-            const rawUrl = activeUrl.searchParams.get('value');
+            const uri = activeUrl.searchParams.get('value');
 
-            if (rawUrl) {
-                const decodedUrl = decodeURIComponent(rawUrl);
-                console.log("App 已開著！接收到新協議網址：", decodedUrl);
+            if (uri) {
+                const url = new URL(decodeURIComponent(uri));
+                console.log("App 已開著！接收到新協議網址：", url);
 
                 // 3. 觸發您的 Callback 函數
-                parseUrl(decodedUrl);
+                parseUrl(url);
             }
         });
     } else {
@@ -213,6 +269,20 @@
             }
         });
     }
+
+    // 初始化掃描器（"reader" 是 HTML 容器的 ID）
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { 
+            fps: 10,          // 每秒解碼幾次
+            qrbox: { width: 250, height: 250 }, // 掃描框大小
+            rememberLastUsedCamera: true // 記住上次使用的鏡頭
+        },
+        /* verbose= */ false
+    );
+
+    // 5. 啟動掃描器
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
 
     window.onload = init;
 </script>
