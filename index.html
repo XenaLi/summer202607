@@ -138,7 +138,7 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
         // 使用相對路徑註冊 sw.js
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('js/sw.js')
             .then(reg => console.log('Service Worker 註冊成功！', reg))
             .catch(err => console.log('Service Worker 註冊失敗：', err));
         });

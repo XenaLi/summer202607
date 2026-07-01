@@ -1,8 +1,8 @@
 {
   "name": "summer202607_prj",
   "short_name": "summer",
-  "start_url": "/summer202607/",
-  "scope": "/summer202607/",
+  "start_url": "./index.html",
+  "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
