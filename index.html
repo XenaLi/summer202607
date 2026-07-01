@@ -157,7 +157,10 @@
     };
 
     function closeBoot() {
-        document.getElementById('boot-screen').style.display = 'none';
+        let bootScreen = document.getElementById('boot-screen');
+        if (bootScreen.style.display != 'none') {
+            bootScreen.style.display = 'none';
+        }
     }
 
     function init() {
@@ -174,20 +177,21 @@
         if (gemId && gemLibrary[gemId] && !collection.includes(gemId)) {
             collection.push(gemId);
             localStorage.setItem('zpd_v10_final', JSON.stringify(collection));
+            console.log("gem found:", gemId);
 
             // 延遲跳出彈窗，增加視覺儀式感
             setTimeout(() => {
-                document.getElementById('atitle').innerText = "尋獲「" + gemLibrary[gemId][0] + "寶石」";
-                document.getElementById('amsg').innerText = gemLibrary[gemId][1];
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('alert-box').style.display = 'block';
+                showFoundPopup(gemId);
                 closeBoot(); 
+                refreshGrid(collection);
             }, 1000);
         } else {
             // 一般登入，2秒後自動進入系統
-            setTimeout(closeBoot, 2000);
+            setTimeout(() => {
+                closeBoot();
+                refreshGrid(collection);
+            }, 2000);
         }
-        refreshGrid(collection);
     }
 
     function refreshGrid(arr) {
@@ -200,15 +204,20 @@
 
     function finalizeCollection() {
         // 清除網址參數，避免刷新時重複跳出彈窗
-        window.location.href = window.location.pathname;
+        if (window.location.search != "") {
+            console.log("redirect for cleaning web url")
+            window.location.href = window.location.pathname;
+        } else {
+            closeFoundPopup();
+        }
     }
 
     // 掃描成功的回呼函式
     function onScanSuccess(decodedText, decodedResult) {
         // 停止掃描，避免重複觸發跳轉
         closeScanner().then(() => {
+            console.log("scan success", decodedText);
             handleInternalNavigation(decodedText);
-            closeScanner();
         }).catch(error => {
             console.error("停止，掃描失敗：", error);
         });
@@ -236,6 +245,18 @@
             // 如果掃描出來的不是標準網址，嘗試當作純相對路徑處理
             console.error("Incorrect QR code:", scannedUrl);
         }
+    }
+
+    function showFoundPopup(gemId) {
+        document.getElementById('atitle').innerText = "尋獲「" + gemLibrary[gemId][0] + "寶石」";
+        document.getElementById('amsg').innerText = gemLibrary[gemId][1];
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('alert-box').style.display = 'block';
+    }
+
+    function closeFoundPopup() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('alert-box').style.display = 'none';
     }
 
     // 處理scheme轉導
